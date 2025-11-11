@@ -2,3 +2,5 @@
 
 
 > npm i openai
+
+> npm i tiktoken
