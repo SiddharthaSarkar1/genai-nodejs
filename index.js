@@ -10,10 +10,10 @@ const client = new OpenAI({ apiKey: APIKEY });
 
 async function main() {
   const response = await client.images.generate({
-    model: "dall-e-2",
+    model: "gpt-image-1",
     prompt: "a cute baby boy in a bus",
-    size: "512x512",
-    response_format: "b64_json",
+    // size: "512x512",
+    // response_format: "b64_json",
     n:1,
   });
 
