@@ -1,26 +1,19 @@
-import { File } from 'node:buffer';
-if (!globalThis.File) globalThis.File = File;
-
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { createReadStream, writeFileSync } from "fs";
 
 dotenv.config();
 
-const APIKEY = process.env.OPENAI_KEY;
+const APIKEY = process.env.GEMINI_KEY;
 
-const client = new OpenAI({ apiKey: APIKEY });
+const googleAI = new GoogleGenAI({ apiKey: APIKEY });
 
 async function main() {
-  const textResponse = await client.audio.transcriptions.create({
-    model: "whisper-1",
-    file: createReadStream('sample-audio.mp3'),
-    language: "en",
+  const response = await googleAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: "Tell table of 54",
   });
 
-  console.log(textResponse.text);
-  const rawText = textResponse.text;
-  writeFileSync("audioToText.txt", rawText, "utf-8");
+  console.log(response.text);
 }
 
 main();
