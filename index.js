@@ -1,46 +1,34 @@
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import express from "express";
+import { readFileSync } from "fs";
 
 dotenv.config();
 
-const app = express();
-
-const PORT = 8080;
-
 const APIKEY = process.env.GEMINI_KEY;
 
-const googleAI = new GoogleGenAI({ apiKey: APIKEY });
+const client = new GoogleGenAI({ apiKey: APIKEY });
 
-app.get("/", async (req, res) => {
-
-  const response = await googleAI.models.generateContentStream({
-    model: "gemini-2.5-flash",
-    contents: "How can I be an AI engineer in 1 - 2 year?",
-    config: {
-      // systemInstruction: "give the answer in 20 to 25 words only"
-      // thinkingConfig: {
-      //   includeThoughts: true,
-      //   thinkingBudget: 100
-      // },
-      // temperature: 2.0
-    },
+async function main() {
+  const base64Img = readFileSync("sample-img.webp", {
+    encoding: "base64",
   });
 
-  // console.log(response.text);
-  // console.log(response.candidates[0].content);
+  const response = await client.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        inlineData: {
+          mimeType: "image/webp",
+          data: base64Img,
+        },
+      },
+      {
+        text: "read text from this image, also mention the colours used in the image",
+      },
+    ],
+  });
 
-  //for stream we need to use for loop for response
-  for await (let chunk of response){
-    const responseText = chunk.text;
-    if(responseText){
-      res.write(responseText);
-    }
-  }
-  res.end("_____Content Completed______");
-})
+  console.log(response.text);
+}
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
-  
-})
+main();
