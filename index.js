@@ -1,6 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { readFileSync } from "fs";
+import express from "express";
+import multer from "multer";
+
+const app = express();
+
+const PORT = 8080;
 
 dotenv.config();
 
@@ -8,8 +14,24 @@ const APIKEY = process.env.GEMINI_KEY;
 
 const client = new GoogleGenAI({ apiKey: APIKEY });
 
-async function main() {
-  const base64Img = readFileSync("sample-img.webp", {
+const upload = multer({ dest: "uploads" });
+
+app.get("/", (req, res) => {
+  res.send(`
+        <form method="post" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="image" />
+        <button>Read Image</button>
+        </form>
+        `);
+});
+
+app.post("/upload", upload.single("image"), async (req, res) => {
+  const path = req.file.path;
+  res.send(await main(path));
+});
+
+async function main(path) {
+  const base64Img = readFileSync(path, {
     encoding: "base64",
   });
 
@@ -23,12 +45,16 @@ async function main() {
         },
       },
       {
-        text: "read text from this image, also mention the colours used in the image",
+        text: "read text from this image",
       },
     ],
   });
 
-  console.log(response.text);
+  return response.text;
 }
 
-main();
+// main();
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port: ${PORT}`);
+});
